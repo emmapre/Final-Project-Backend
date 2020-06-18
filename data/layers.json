@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "name": "Topping",
+    "ingredients": [
+      {
+        "ingredientName": "Strawberries",
+        "ingredientColor": "red"
+      },
+      {
+        "ingredientName": "Blueberries",
+        "ingredientColor": "blue"
+      },
+      {
+        "ingredientName": "Raspberries",
+        "ingredientColor": "crimson"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Coating",
+    "ingredients": [
+      {
+        "ingredientName": "Cream",
+        "ingredientColor": "linen"
+      },
+      {
+        "ingredientName": "Frosting",
+        "ingredientColor": "pink"
+      },
+      {
+        "ingredientName": "Icing",
+        "ingredientColor": "pink"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Sponge",
+    "ingredients": [
+      {
+        "ingredientName": "Chocolate",
+        "ingredientColor": "brown"
+      },
+      {
+        "ingredientName": "Vanilla",
+        "ingredientColor": "bisque"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "First filling",
+    "ingredients": [
+      {
+        "ingredientName": "Jam",
+        "ingredientColor": "maroon"
+      },
+      {
+        "ingredientName": "Custard",
+        "ingredientColor": "lightyellow"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Second filling",
+    "ingredients": [
+      {
+        "ingredientName": "Jam",
+        "ingredientColor": "maroon"
+      },
+      {
+        "ingredientName": "Custard",
+        "ingredientColor": "lightyellow"
+      }
+    ]
+  }
+]

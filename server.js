@@ -4,47 +4,46 @@ import cors from 'cors'
 import mongoose from 'mongoose'
 import crypto from 'crypto'
 import bcrypt from 'bcrypt-nodejs'
+import layersData from './data/layers.json'
 
 
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/cakeMaker"
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.Promise = Promise
 
+
+
+//Layer model
+const Layer = mongoose.model('Layer', {
+  name: {
+    type: String
+  },
+  ingredients: [
+    {
+      ingredientName: {
+        type: String,
+      },
+      ingredientColor: {
+        type: String,
+      }
+    }
+  ]
+})
+
 //CakeOrder model
 const CakeOrder = mongoose.model('CakeOrder', {
-  cakeName: {
-    type: String,
-    required: true,
-    minlength: 5
-  },
-  topping: {
-    type: String,
+  chosenIngredients: {
+    type: Array,
     required: true,
   },
-  cover: {
-    type: String,
-    required: true,
-  },
-  layer1: {
-    type: String,
-    required: true,
-  },
-  layer2: {
-    type: String,
-    required: true,
-  },
-  sponge: {
-    type: String,
-    required: true,
+  orderedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   },
   createdAt: {
     type: Date,
     default: Date.now
   },
-  orderedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }
 })
 
 
@@ -80,20 +79,40 @@ const User = mongoose.model('User', {
     default: () => crypto.randomBytes(128).toString('hex')
   },
   //INGEN ANING HUR JAG SKA LÄGGA IN DET HÄR
-  // orderedCakes: [{
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: 'CakeOrder'
-  // }],
+  orderedCakes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CakeOrder'
+  }],
 })
 
+if (process.env.RESET_DB) {
+  console.log('Resetting database.')
+
+  const seedDatabase = async () => {
+    await Layer.deleteMany()
+
+    await layersData.forEach(layer => new Layer(layer).save())
+  }
+  seedDatabase()
+}
 
 const authenticateUser = async (req, res, next) => {
-  const user = await User.findOne({ accessToken: req.header('Authorization') })
-  if (user) {
-    req.user = user
-    next()
-  } else {
-    res.status(401).json({ loggedOut: true })
+  try {
+    const user = await User.findOne({
+      accessToken: req.header('Authorization')
+    })
+    if (user) {
+      req.user = user
+      next()
+    } else {
+      res
+        .status(401)
+        .json({ loggedOut: true, message: 'Please try logging in again' })
+    }
+  } catch (err) {
+    res
+      .status(403)
+      .json({ message: 'Access token is missing or wrong', errors: err })
   }
 }
 
@@ -115,6 +134,18 @@ app.get('/', (req, res) => {
   res.send(listEndpoints(app))
 })
 
+//LAYERS ENDPOINT
+app.get('/layers', async (req, res) => {
+  try {
+    const layers = await Layer.find()
+    res.status(200).json(layers)
+  } catch (err) {
+    res.status(404).json({
+      message: `No results`,
+      errors: err.error
+    })
+  }
+})
 
 //USER ENDPOINTS
 //signup endpoint
@@ -146,44 +177,80 @@ app.get('/users', async (req, res) => {
 })
 
 //To get one single user
+app.get('users/userId', authenticateUser)
 app.get('/users/:userId', async (req, res) => {
-  const { userId } = req.params
-  try {
-    const user = await User.findOne({ _id: userId })
-      .populate('orderedCakes')
-    res.status(200).json(user)
-  } catch (err) {
-    res.status(400).json({ error: 'Could not find user.', errors: err.errors });
-  }
+  res.status(201).json({ email: req.user.email, userId: req.user._id })
+
+
+  // const { userId } = req.params
+  // try {
+  //   const user = await User.findOne({ _id: userId })
+  //     .populate('orderedCakes')
+  //   res.status(200).json(user)
+  // } catch (err) {
+  //   res.status(400).json({ error: 'Could not find user.', errors: err.errors });
+  // }
 })
 
 
 
 //Sign in endpoint
 app.post('/sessions', async (req, res) => {
-  const user = await User.findOne({ email: req.body.email })
-  if (user && bcrypt.compareSync(req.body.password, user.password)) {
-    res.json({ userId: user._id, accessToken: user.accessToken })
-  } else {
-    res.status(400).json({ notFound: true })
+  try {
+    const { email, password } = req.body
+    const user = await User.findOne({ email: req.body.email })
+    if (user && bcrypt.compareSync(req.body.password, user.password)) {
+      res.status(201).json({ userId: user._id, accessToken: user.accessToken })
+    } else {
+      res.status(404).json({ notFound: true })
+    }
+  } catch (err) {
+    res.status(404).json({ notFound: true })
   }
 })
 
-// app.get('/secrets', authenticateUser)
-// app.get('/secrets', (req, res) => {
-//   res.json({ secret: 'This is a super secret message.' })
-// })
-
 
 //cakeendpoinsen med login måste ligga under sessions eftersom man måste ha login för att kunna komma åt dem.
+//POST to cakeorder
+
+app.post('/cakeorders', authenticateUser)
+app.post('/cakeorders', async (req, res) => {
+  const {
+    chosenIngredients,
+    userId
+  } = req.body
+
+  try {
+    const cakeOrder = await new CakeOrder(req.body).save()
+
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { orderedCakes: cakeOrder._id } }
+    )
+    res.status(201).json(order)
+  } catch (err) {
+    res.status(400).json({
+      message: 'Could not place order',
+      errors: err.errors
+    })
+  }
+})
+
 //CAKEORDER ENDPOINTS
 //GET all cake orders
 app.get('/cakeorders', async (req, res) => {
+
   try {
     const cakeOrders = await CakeOrder.find()
       .sort({ createdAt: 'desc' })
       .limit(20)
       .exec()
+      .populate('userId'
+        //   {
+        //   // path: 'users',
+        //   // select: '_id name',
+        // }
+      )
     res.json(cakeOrders)
   } catch (err) {
     res.status(404).json({
@@ -192,6 +259,39 @@ app.get('/cakeorders', async (req, res) => {
     })
   }
 })
+
+app.get('/users/:userId', authenticateUser)
+app.get('/users/:userId', async (req, res) => {
+  const { userId } = req.params
+
+  try {
+    const user = await User.findOne({ _id: userId })
+      .populate({
+        path: 'orderHistory',
+        select: 'items createdAt status',
+        populate: {
+          path: 'items',
+          select: 'name price'
+        }
+      })
+      .populate({
+        path: 'products',
+        select: 'name description createdAt sold'
+      })
+
+    res.status(200).json(user)
+  } catch (err) {
+    res.status(400).json({
+      message: ERR_INVALID_REQUEST,
+      errors: err.errors
+    })
+  }
+})
+
+
+
+
+
 
 //GET one specific cake order
 app.post('/cakeorders/:cakeOrderId', authenticateUser)
@@ -208,43 +308,7 @@ app.get('/cakeorders/:cakeOrderId', async (req, res) => {
   }
 })
 
-//POST to cakeorder
-app.post('/cakeorders', authenticateUser)
-app.post('/cakeorders', async (req, res) => {
-  const { cakeName, topping, cover, layer1, layer2, sponge } = req.body
-  const cakeOrder = new CakeOrder({ cakeName, topping, cover, layer1, layer2, sponge })
-  try {
-    const savedCakeOrder = await cakeOrder.save()
-      .populate('orderedBy')
-    res.status(201).json(savedCakeOrder)
-  } catch (err) {
-    res.status(400).json({ message: 'Could not save the cake order', error: err.errors })
-  }
-})
-
-
-
-
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`)
 })
-
-
-
-
-// {
-// 	"cakeName":"Emmas cool cake",
-// 	"topping":"strawberries",
-// 	"cover":"cream",
-// 	"layer1":"custard",
-// 	"layer2":"jam",
-// 	"sponge":"vanilla"
-// }
-
-
-// {
-// 	"name": "Emma",
-// 	"email": "emma@emma.se",
-// 	"password": "emmaemma"
-// }
