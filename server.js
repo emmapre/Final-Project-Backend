@@ -36,7 +36,7 @@ const CakeOrder = mongoose.model('CakeOrder', {
     type: Array,
     required: true,
   },
-  orderedBy: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
@@ -78,7 +78,6 @@ const User = mongoose.model('User', {
     type: String,
     default: () => crypto.randomBytes(128).toString('hex')
   },
-  //INGEN ANING HUR JAG SKA LÄGGA IN DET HÄR
   orderedCakes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'CakeOrder'
@@ -171,6 +170,7 @@ app.post('/users', async (req, res) => {
 app.get('/users', async (req, res) => {
   const users = await User.find()
     .sort({ createdAt: 'desc' })
+    .populate('orderedCakes')
     .limit(20)
     .exec()
   res.json(users)
@@ -243,14 +243,9 @@ app.get('/cakeorders', async (req, res) => {
   try {
     const cakeOrders = await CakeOrder.find()
       .sort({ createdAt: 'desc' })
+      .populate('userId')
       .limit(20)
       .exec()
-      .populate('userId'
-        //   {
-        //   // path: 'users',
-        //   // select: '_id name',
-        // }
-      )
     res.json(cakeOrders)
   } catch (err) {
     res.status(404).json({
