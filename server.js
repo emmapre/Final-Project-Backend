@@ -166,7 +166,7 @@ app.post('/users', async (req, res) => {
   }
 })
 
-//To get a list of users (not sure I'll need this for other than testing)
+//To get a list of users (Only for testing)
 app.get('/users', async (req, res) => {
   const users = await User.find()
     .sort({ createdAt: 'desc' })
@@ -175,24 +175,6 @@ app.get('/users', async (req, res) => {
     .exec()
   res.json(users)
 })
-
-//To get one single user
-app.get('users/userId', authenticateUser)
-app.get('/users/:userId', async (req, res) => {
-  res.status(201).json({ email: req.user.email, userId: req.user._id })
-
-
-  // const { userId } = req.params
-  // try {
-  //   const user = await User.findOne({ _id: userId })
-  //     .populate('orderedCakes')
-  //   res.status(200).json(user)
-  // } catch (err) {
-  //   res.status(400).json({ error: 'Could not find user.', errors: err.errors });
-  // }
-})
-
-
 
 //Sign in endpoint
 app.post('/sessions', async (req, res) => {
@@ -212,14 +194,12 @@ app.post('/sessions', async (req, res) => {
 
 //cakeendpoinsen med login måste ligga under sessions eftersom man måste ha login för att kunna komma åt dem.
 //POST to cakeorder
-
 app.post('/cakeorders', authenticateUser)
 app.post('/cakeorders', async (req, res) => {
   const {
-    chosenIngredients,
+    // chosenIngredients,
     userId
   } = req.body
-
   try {
     const cakeOrder = await new CakeOrder(req.body).save()
 
@@ -227,7 +207,7 @@ app.post('/cakeorders', async (req, res) => {
       { _id: userId },
       { $push: { orderedCakes: cakeOrder._id } }
     )
-    res.status(201).json(order)
+    res.status(201).json(cakeOrder)
   } catch (err) {
     res.status(400).json({
       message: 'Could not place order',
@@ -239,7 +219,6 @@ app.post('/cakeorders', async (req, res) => {
 //CAKEORDER ENDPOINTS
 //GET all cake orders
 app.get('/cakeorders', async (req, res) => {
-
   try {
     const cakeOrders = await CakeOrder.find()
       .sort({ createdAt: 'desc' })
@@ -254,39 +233,6 @@ app.get('/cakeorders', async (req, res) => {
     })
   }
 })
-
-app.get('/users/:userId', authenticateUser)
-app.get('/users/:userId', async (req, res) => {
-  const { userId } = req.params
-
-  try {
-    const user = await User.findOne({ _id: userId })
-      .populate({
-        path: 'orderHistory',
-        select: 'items createdAt status',
-        populate: {
-          path: 'items',
-          select: 'name price'
-        }
-      })
-      .populate({
-        path: 'products',
-        select: 'name description createdAt sold'
-      })
-
-    res.status(200).json(user)
-  } catch (err) {
-    res.status(400).json({
-      message: ERR_INVALID_REQUEST,
-      errors: err.errors
-    })
-  }
-})
-
-
-
-
-
 
 //GET one specific cake order
 app.post('/cakeorders/:cakeOrderId', authenticateUser)

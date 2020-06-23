@@ -5,15 +5,15 @@
     "ingredients": [
       {
         "ingredientName": "Strawberries",
-        "ingredientColor": "red"
+        "ingredientColor": "#e02636"
       },
       {
         "ingredientName": "Blueberries",
-        "ingredientColor": "blue"
+        "ingredientColor": "#41599c"
       },
       {
         "ingredientName": "Raspberries",
-        "ingredientColor": "crimson"
+        "ingredientColor": "#db3d75"
       }
     ]
   },
@@ -23,15 +23,15 @@
     "ingredients": [
       {
         "ingredientName": "Cream",
-        "ingredientColor": "linen"
+        "ingredientColor": "#fcf3eb"
       },
       {
         "ingredientName": "Frosting",
-        "ingredientColor": "pink"
+        "ingredientColor": "#f7d2ec"
       },
       {
         "ingredientName": "Icing",
-        "ingredientColor": "pink"
+        "ingredientColor": "#e6f8ff"
       }
     ]
   },
@@ -41,11 +41,15 @@
     "ingredients": [
       {
         "ingredientName": "Chocolate",
-        "ingredientColor": "brown"
+        "ingredientColor": "#542d08"
       },
       {
         "ingredientName": "Vanilla",
-        "ingredientColor": "bisque"
+        "ingredientColor": "#fcda72"
+      },
+      {
+        "ingredientName": "Lemon",
+        "ingredientColor": "#fff29c"
       }
     ]
   },
@@ -55,11 +59,15 @@
     "ingredients": [
       {
         "ingredientName": "Jam",
-        "ingredientColor": "maroon"
+        "ingredientColor": "#ba1337"
       },
       {
         "ingredientName": "Custard",
-        "ingredientColor": "lightyellow"
+        "ingredientColor": "#facd8e"
+      },
+      {
+        "ingredientName": "Mousse",
+        "ingredientColor": "#91390a"
       }
     ]
   },
@@ -69,11 +77,15 @@
     "ingredients": [
       {
         "ingredientName": "Jam",
-        "ingredientColor": "maroon"
+        "ingredientColor": "#ba1337"
       },
       {
         "ingredientName": "Custard",
-        "ingredientColor": "lightyellow"
+        "ingredientColor": "#ffdf8f"
+      },
+      {
+        "ingredientName": "Mousse",
+        "ingredientColor": "#91390a"
       }
     ]
   }
