@@ -223,7 +223,7 @@ app.get('/cakeorders', async (req, res) => {
     const cakeOrders = await CakeOrder.find()
       .sort({ createdAt: 'desc' })
       .populate('userId')
-      .limit(20)
+      .limit(12)
       .exec()
     res.json(cakeOrders)
   } catch (err) {
