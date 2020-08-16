@@ -1,7 +1,17 @@
-# Express Starter Project
+# Cake maker
+This is my final project at Technigo's bootcamp. It is a webshop where you can order a cake. You choose the ingredients of the cake and place your order. You have to sign up to order. There is also a page where you can see the latest orders. 
 
-This project includes the packages and babel setup for an express server, and is just meant to make things a little simpler to get up and running with.
+## How it is made
+The ingredients you can choose from, the users and the orders are all saved in a MongoDB database using Express APIs. The frontend is built with React and Redux and styled using styled components. 
 
-## Getting started
+## Tech
+- React
+- Redux
+- Styled components
+- Node.js
+- Express API
+- MongoDB
 
-Install dependencies with `npm install`, then start the server by running `npm run dev`
+## Take a look
+https://cake-maker.netlify.app/
+https://cakemaker-final-project.herokuapp.com/
